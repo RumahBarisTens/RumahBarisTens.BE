@@ -1,0 +1,40 @@
+image: gradle:8.5-jdk21
+
+stages:
+  - build
+  - docker
+
+variables:
+  DOCKER_IMAGE: docker.io/martinmt7/tens-container
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+
+before_script:
+  - export PATH="$GRADLE_USER_HOME/wrapper/dists/gradle-*/bin:$PATH"
+
+cache:
+  key: gradle
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+build:
+  stage: build
+  script:
+    - gradle build -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 hour
+
+docker:
+  image: docker:24.0.7
+  stage: docker
+  services:
+    - docker:24.0.7-dind
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - docker build -t "$DOCKER_IMAGE:$CI_COMMIT_REF_SLUG" .
+    - docker tag "$DOCKER_IMAGE:$CI_COMMIT_REF_SLUG" "$DOCKER_IMAGE:latest"
+    - docker push "$DOCKER_IMAGE:$CI_COMMIT_REF_SLUG"
+    - docker push "$DOCKER_IMAGE:latest"
