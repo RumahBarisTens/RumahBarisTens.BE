@@ -194,8 +194,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         
         // Save to database
         leaveRequest = leaveRequestDb.save(leaveRequest);
-
-        notificationService.notifyLeaveRequestApproved(id, leaveRequest.getUser().getUsername());
+        notificationService.notifyLeaveRequestApproved(leaveRequest.getId(), leaveRequest.getUser().getUsername());
+        System.out.println("APU");
         
         // Return response
         return mapToLeaveRequestResponseDTO(leaveRequest);

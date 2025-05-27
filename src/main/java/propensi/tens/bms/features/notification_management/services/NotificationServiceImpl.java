@@ -498,7 +498,7 @@ public class NotificationServiceImpl implements NotificationService {
         String message = "Barista " + request.getUser().getFullName() + 
                 " has canceled their " + request.getLeaveType().toString() + " request";
         String resourceType = "LEAVE_REQUEST";
-        String actionUrl = "/shift-management/leave-requests";
+        String actionUrl = "jadwal/izin-cuti/headbar/reports";
         
         try {
             createNotification(
@@ -528,7 +528,7 @@ public class NotificationServiceImpl implements NotificationService {
         String message = "Barista " + user.getUsername() + 
                 " has canceled their " + request.getDateOvertime() + " log";
         String resourceType = "OVERTIME_LOG";
-        String actionUrl = "";
+        String actionUrl = "jadwal/lembur/headbar/reports";
         
         try {
             createNotification(
@@ -586,11 +586,14 @@ public class NotificationServiceImpl implements NotificationService {
         String typeString = request.getLeaveType().toString().toLowerCase();
         String title = typeString.substring(0, 1).toUpperCase() + typeString.substring(1) + " Request Approved";
         
-        String message = "Your " + typeString + " request for " + 
-                DateTimeFormatter.ofPattern("dd MMM yyyy").format((TemporalAccessor) request.getRequestDate()) + 
-                " has been approved";
+       String message = "Your " + typeString + " request for " +
+    DateTimeFormatter.ofPattern("dd MMM yyyy").format(
+        ((java.sql.Date) request.getRequestDate()).toLocalDate()
+    ) +
+    " has been approved";
+
         String resourceType = "LEAVE_REQUEST";
-        String actionUrl = "/jadwal/izin-cuti/barista";
+        String actionUrl = "/jadwal/izin-cuti/barista/list";
         
         try {
             createNotification(
