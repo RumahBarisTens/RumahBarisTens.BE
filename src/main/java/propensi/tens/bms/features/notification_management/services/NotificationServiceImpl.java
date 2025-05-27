@@ -243,7 +243,7 @@ public class NotificationServiceImpl implements NotificationService {
         String title = "Essay Review Required";
         String message = "Ujian milik " + submitterUsername + " perlu dinilai";
         String resourceType = "ESSAY_SUBMISSION";
-        String actionUrl = "/assessment/" + submission.getAssessment().getId() + "/submission/" + submissionId + "/review";
+        String actionUrl = "/assessment/dashboard-clevel/" + submission.getAssessment().getId();
         
         for (EndUser clevel : clevels) {
             try {
@@ -327,7 +327,7 @@ public class NotificationServiceImpl implements NotificationService {
         String title = "New Peer Review Assignment";
         String message = "You have been assigned to review " + revieweeUsername;
         String resourceType = "PEER_REVIEW";
-        String actionUrl = "/peer-review/assignment/" + assignmentId;
+        String actionUrl = "/peer-review/";
         
         try {
             createNotification(
@@ -444,7 +444,7 @@ public class NotificationServiceImpl implements NotificationService {
         String title = "New Training Material Assigned";
         String message = "Kamu ditugaskan untuk membaca materi: " + training.getTitle();
         String resourceType = "TRAINING_MATERIAL";
-        String actionUrl = "/training-material/" + trainingMaterialId;
+        String actionUrl = "/training-materials";
         
         for (AssignedRole assignedRole : assignedRoles) {
             List<?> users = switch (assignedRole) {
@@ -558,7 +558,7 @@ public class NotificationServiceImpl implements NotificationService {
                 DateTimeFormatter.ofPattern("dd MMM yyyy").format(shift.getDateShift()) 
                 ;
         String resourceType = "SHIFT";
-        String actionUrl = "/shift-management/my-shifts";
+        String actionUrl = "/jadwal/shift";
         
         for (EndUser user : assignedUsers) {
             try {
@@ -590,7 +590,7 @@ public class NotificationServiceImpl implements NotificationService {
                 DateTimeFormatter.ofPattern("dd MMM yyyy").format((TemporalAccessor) request.getRequestDate()) + 
                 " has been approved";
         String resourceType = "LEAVE_REQUEST";
-        String actionUrl = "/shift-management/my-requests";
+        String actionUrl = "/jadwal/izin-cuti/barista";
         
         try {
             createNotification(
@@ -618,7 +618,7 @@ public class NotificationServiceImpl implements NotificationService {
                 DateTimeFormatter.ofPattern("dd MMM yyyy").format((TemporalAccessor) request.getDateOvertime()) + 
                 " telah disetujui";
         String resourceType = "OVERTIME_LOG";
-        String actionUrl = "/shift-management/my-requests";
+        String actionUrl = "/jadwal/lembur/" + requestId;
         
         try {
             createNotification(
