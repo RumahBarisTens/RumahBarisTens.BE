@@ -88,7 +88,7 @@ public class ShiftDashboardController {
                     return item;
                 })
                 .collect(Collectors.toList());
-            response.put("activeShiftsByOutlet", activeShiftsByOutlet);
+            response.put("activeShiftsByOutlet", activeShiftsByOutlet); 
             
             // Get outlet details
             List<Map<String, Object>> outletDetails = outletRepository.findAll().stream()
