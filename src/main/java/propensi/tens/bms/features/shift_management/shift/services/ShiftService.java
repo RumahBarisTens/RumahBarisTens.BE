@@ -12,41 +12,33 @@ import java.util.UUID;
 public interface ShiftService {
 
     /**
-     * Mendapatkan semua shift berdasarkan peran pengguna dan outlet ID.
-     * @param role peran pengguna (misalnya, HeadBarista, Barista, dll.)
-     * @param outletId ID outlet
-     * @return daftar shift schedule
+     * Get all shifts by user role and outlet ID.
+     * @param role the user role (e.g., HeadBarista, Barista, etc.)
+     * @param outletId the outlet identifier
+     * @return list of shift schedules
      */
     List<ShiftScheduleResponseDto> getShiftsByUserRole(String role, Long outletId);
 
     /**
-     * Membuat jadwal shift baru.
-     * @param dto payload request jadwal shift
-     * @return jadwal shift yang telah dibuat
+     * Create a new shift schedule.
+     * @param dto shift schedule request payload
+     * @return created shift schedule
      */
     ShiftScheduleResponseDto createShift(ShiftScheduleRequestDto dto);
 
-    /**
-     * Mendapatkan shift berdasarkan outlet dan rentang tanggal.
-     * @param outletId ID outlet
-     * @param startDate tanggal mulai
-     * @param endDate tanggal akhir
-     * @return daftar shift schedule
-     */
-    List<ShiftScheduleResponseDto> getShiftsByOutletAndDateRange(Long outletId, LocalDate startDate, LocalDate endDate);
 
-    /**
-     * Mendapatkan ringkasan shift berdasarkan userId dan bulan.
-     * @param userId ID pengguna
-     * @param month bulan yang ingin diambil
-     * @return Ringkasan shift
-     */
-    ShiftSummary getShiftSummary(UUID userId, String month);
-    
+    List<ShiftScheduleResponseDto> getShiftsByOutletAndDateRange(Long outletId, LocalDate startDate, LocalDate endDate);
+    // void deleteShiftById(Long id);
+
+    boolean softDeleteShift(Long shiftId);
+
+    ShiftSummary getShiftSummary(UUID userId, String monthYear);
+
     /**
      * Mengkonversi ShiftSchedule entity menjadi ShiftScheduleResponseDto.
      * @param shift entity ShiftSchedule
      * @return DTO ShiftScheduleResponseDto
      */
     ShiftScheduleResponseDto convertToResponseDto(ShiftSchedule shift);
+
 }

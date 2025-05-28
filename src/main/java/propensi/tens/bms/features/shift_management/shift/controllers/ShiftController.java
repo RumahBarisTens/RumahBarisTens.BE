@@ -1,22 +1,25 @@
 package propensi.tens.bms.features.shift_management.shift.controllers;
 
+import propensi.tens.bms.features.account_management.models.EndUser;
 import propensi.tens.bms.features.shift_management.shift.dto.request.ShiftScheduleRequestDto;
 import propensi.tens.bms.features.shift_management.shift.dto.response.ShiftScheduleResponseDto;
-import propensi.tens.bms.features.shift_management.shift.services.ShiftService;
 import propensi.tens.bms.features.shift_management.shift.models.ShiftSchedule;
 import propensi.tens.bms.features.shift_management.shift.models.ShiftSummary;
+import propensi.tens.bms.features.shift_management.shift.services.ShiftService;
 import propensi.tens.bms.features.shift_management.shift.repositories.ShiftScheduleRepository;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("api/shift")
@@ -29,6 +32,7 @@ public class ShiftController {
     private ShiftScheduleRepository shiftScheduleRepository;
 
     private final Logger logger = LoggerFactory.getLogger(ShiftController.class);
+
 
     @GetMapping("/{outletId}")
     public ResponseEntity<?> getShiftsByOutletAndDateRange(
@@ -93,6 +97,76 @@ public class ShiftController {
         return ResponseEntity.ok(responseDto);
     }
 
+
+
+  
+    @DeleteMapping("/{shiftId}")
+    public ResponseEntity<?> deleteShift(@PathVariable Long shiftId) {
+        boolean deleted = shiftService.softDeleteShift(shiftId);
+
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Shift not found");
+        }
+
+        return ResponseEntity.ok("Shift deleted (soft)");
+    }
+
+
+    @DeleteMapping("/api/shift/{shiftId}/barista/{baristaId}")
+    public ResponseEntity<?> removeBaristaFromShift(
+        @PathVariable Long shiftId,
+        @PathVariable UUID baristaId
+    ) {
+        Optional<ShiftSchedule> optionalShift = shiftScheduleRepository.findById(shiftId);
+        if (optionalShift.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Shift not found");
+        }
+
+        ShiftSchedule shift = optionalShift.get();
+
+        // Filter barista
+        List<EndUser> updatedBaristas = shift.getListBarista().stream()
+            .filter(b -> !b.getId().equals(baristaId))
+            .collect(Collectors.toList());
+
+        if (updatedBaristas.isEmpty()) {
+            // Kalau barista udah habis, hapus shift-nya (soft delete atau hard delete)
+            shiftScheduleRepository.delete(shift); // atau soft-delete
+            return ResponseEntity.ok("Shift deleted because no baristas left");
+        }
+
+        // Masih ada barista, update list dan save
+        shift.setListBarista(updatedBaristas);
+        shiftScheduleRepository.save(shift);
+
+        return ResponseEntity.ok("Barista removed from shift");
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<?> getShiftDetailByDate(
+            @RequestParam UUID userId,
+            @RequestParam String date) {
+
+        logger.info("===== START getShiftDetailByDate =====");
+
+        try {
+            LocalDate shiftDate = LocalDate.parse(date);
+            List<ShiftSchedule> shifts = shiftScheduleRepository.findShiftsByUserIdAndDate(userId, shiftDate);
+
+            List<ShiftScheduleResponseDto> shiftDetails = shifts.stream()
+                    .map(shift -> shiftService.convertToResponseDto(shift))
+                    .collect(Collectors.toList());
+
+            logger.info("===== END getShiftDetailByDate SUCCESS =====");
+            return ResponseEntity.ok(shiftDetails);
+
+        } catch (Exception e) {
+            logger.error("===== ERROR getShiftDetailByDate =====", e);
+            return ResponseEntity.internalServerError().body("Internal server error. Check logs for details.");
+        }
+    }
+
     @GetMapping("/personal-summary")
     public ResponseEntity<?> getPersonalShiftSummary(
             @RequestParam UUID userId,
@@ -142,30 +216,6 @@ public class ShiftController {
 
         } catch (Exception e) {
             logger.error("===== ERROR getPersonalShiftSummary =====", e);
-            return ResponseEntity.internalServerError().body("Internal server error. Check logs for details.");
-        }
-    }
-
-    @GetMapping("/detail")
-    public ResponseEntity<?> getShiftDetailByDate(
-            @RequestParam UUID userId,
-            @RequestParam String date) {
-
-        logger.info("===== START getShiftDetailByDate =====");
-
-        try {
-            LocalDate shiftDate = LocalDate.parse(date);
-            List<ShiftSchedule> shifts = shiftScheduleRepository.findShiftsByUserIdAndDate(userId, shiftDate);
-
-            List<ShiftScheduleResponseDto> shiftDetails = shifts.stream()
-                    .map(shift -> shiftService.convertToResponseDto(shift))
-                    .collect(Collectors.toList());
-
-            logger.info("===== END getShiftDetailByDate SUCCESS =====");
-            return ResponseEntity.ok(shiftDetails);
-
-        } catch (Exception e) {
-            logger.error("===== ERROR getShiftDetailByDate =====", e);
             return ResponseEntity.internalServerError().body("Internal server error. Check logs for details.");
         }
     }
