@@ -55,4 +55,13 @@ public class PeerReviewSubmissionServiceImpl implements PeerReviewSubmissionServ
             )
         ).toList();
     }
+
+    // @Override
+    // public List<PeerReviewSubmission> getPeerReviewHistoryByUsername(String username) {
+    //     if (username == null || username.trim().isEmpty()) {
+            
+    //         throw new IllegalArgumentException("Username tidak boleh kosong");
+    //     }
+    //     return subRepo.findSubmissionsByUsername(username);
+    // }
 }

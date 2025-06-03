@@ -270,7 +270,12 @@ public class AccountServiceImpl implements AccountService {
             Barista barista = baristaDb.findById(user.getId()).orElse(null);
             Outlet outlet = outletDb.findByOutletId(barista.getOutlet().getOutletId());
             dto.setOutlet(outlet.getName());
-            dto.setRole("Barista");
+            if (barista.getIsIntern()) {
+                dto.setRole("Intern Barista");
+            } else {
+                dto.setRole("Barista");
+                
+            }
         } else if (user instanceof ProbationBarista) {
             ProbationBarista barista = probationBaristaDb.findById(user.getId()).orElse(null);
             Outlet outlet = outletDb.findByOutletId(barista.getOutlet().getOutletId());
@@ -295,7 +300,11 @@ public EndUser updateAccountRoleAndStatus(String username, UpdateAccountRoleStat
     } else if (oldUser instanceof HeadBar) {
         currentRole = "head bar";
     } else if (oldUser instanceof Barista) {
-        currentRole = "barista";
+        if (((Barista) oldUser).getIsIntern()) {
+            currentRole = "intern barista";
+        } else {
+            currentRole = "barista";
+        } 
     } else if (oldUser instanceof ProbationBarista) {
         currentRole = "probation barista";
     } else if (oldUser instanceof CLevel) {
@@ -439,6 +448,7 @@ public EndUser updateAccountRoleAndStatus(String username, UpdateAccountRoleStat
             break;
 
         case "barista":
+        case "intern barista":
             if (newOutlet == null) {
                 throw new Exception("Barista must be assigned to an outlet");
             }
@@ -454,6 +464,7 @@ public EndUser updateAccountRoleAndStatus(String username, UpdateAccountRoleStat
             barista.setDateOfBirth(oldDateOfBirth);
             barista.setStatus(newStatus);
             barista.setOutlet(newOutlet);
+            barista.setIsIntern(newRole.equalsIgnoreCase("intern barista"));
             updatedUser = baristaDb.save(barista);
             
             newOutlet.getListBarista().add(barista);

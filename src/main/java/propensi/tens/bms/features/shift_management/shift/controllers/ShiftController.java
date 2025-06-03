@@ -34,7 +34,7 @@ public class ShiftController {
     private final Logger logger = LoggerFactory.getLogger(ShiftController.class);
 
 
-    @GetMapping("/{outletId}")
+    @GetMapping("/s/{outletId}")
     public ResponseEntity<?> getShiftsByOutletAndDateRange(
             @PathVariable Long outletId,
             @RequestParam(required = false) String startDate,

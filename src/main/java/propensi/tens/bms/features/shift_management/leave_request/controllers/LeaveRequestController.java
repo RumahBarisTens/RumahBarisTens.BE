@@ -121,14 +121,34 @@ public class LeaveRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllLeaveRequests() {
+    public ResponseEntity<?> getAllLeaveRequests(
+        @RequestParam(name = "username", required = false) String headBarUsername
+    ) {
         BaseResponseDTO<List<LeaveRequestResponseDTO>> response = new BaseResponseDTO<>();
-        List<LeaveRequestResponseDTO> leaveRequests = leaveRequestService.getAllLeaveRequests();
-        response.setStatus(HttpStatus.OK.value());
-        response.setMessage("Daftar permohonan berhasil diambil");
-        response.setTimestamp(new Date());
-        response.setData(leaveRequests);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            List<LeaveRequestResponseDTO> leaveRequests;
+            
+            // Jika username disediakan, gunakan untuk memfilter
+            if (headBarUsername != null && !headBarUsername.isEmpty()) {
+                // Asumsikan service memiliki method untuk mendapatkan leave requests berdasarkan head bar
+                leaveRequests = leaveRequestService.getLeaveRequestsByHeadBar(headBarUsername);
+            } else {
+                // Jika tidak ada username, ambil semua leave requests
+                leaveRequests = leaveRequestService.getAllLeaveRequests();
+            }
+            
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Daftar permohonan berhasil diambil");
+            response.setTimestamp(new Date());
+            response.setData(leaveRequests);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/{id}")

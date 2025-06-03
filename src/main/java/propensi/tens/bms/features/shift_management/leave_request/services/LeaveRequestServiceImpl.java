@@ -3,10 +3,13 @@ package propensi.tens.bms.features.shift_management.leave_request.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import propensi.tens.bms.features.account_management.models.Barista;
 import propensi.tens.bms.features.account_management.models.EndUser;
+import propensi.tens.bms.features.account_management.models.HeadBar;
 import propensi.tens.bms.features.account_management.models.Outlet;
 import propensi.tens.bms.features.account_management.repositories.EndUserDb;
+import propensi.tens.bms.features.account_management.repositories.HeadBarDb;
 import propensi.tens.bms.features.account_management.repositories.OutletDb;
 import propensi.tens.bms.features.notification_management.services.NotificationService;
 import propensi.tens.bms.features.shift_management.leave_request.dto.request.ApproveRejectLeaveRequestDTO;
@@ -33,7 +36,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     private EndUserDb endUserDb;
 
     @Autowired
-    private OutletDb outletDb;;
+    private HeadBarDb headBarDb;
+
+    @Autowired
+    private OutletDb outletDb;
 
     @Autowired
     private NotificationService notificationService;
@@ -285,5 +291,35 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequest = leaveRequestDb.save(leaveRequest);
         
         return mapToLeaveRequestResponseDTO(leaveRequest);
+    }
+
+    @Override
+    public List<LeaveRequestResponseDTO> getLeaveRequestsByHeadBar(String headBarUsername) {
+        // Cari HeadBar berdasarkan username
+        EndUser user = endUserDb.findByUsername(headBarUsername);
+        if (user == null) {
+            throw new EntityNotFoundException("Head Bar dengan username " + headBarUsername + " tidak ditemukan");
+        }
+        
+        // Ambil outlet dari head bar
+        Outlet outlet = ((HeadBar) user).getOutlet();
+        if (outlet == null) {
+            throw new RuntimeException("Head Bar tidak memiliki outlet yang terkait");
+        }
+        
+        // Ambil semua barista di outlet tersebut
+        List<UUID> baristaIds = outlet.getListBarista().stream()
+                .map(EndUser::getId)
+                .collect(Collectors.toList());
+        
+        // Ambil semua leave request dari barista-barista tersebut
+        List<LeaveRequest> leaveRequests = leaveRequestDb.findAll();
+        leaveRequests = leaveRequests.stream()
+                .filter(leaveRequest -> baristaIds.contains(leaveRequest.getUser().getId()))
+                .collect(Collectors.toList());
+        
+        return leaveRequests.stream()
+                .map(this::mapToLeaveRequestResponseDTO)
+                .collect(Collectors.toList());
     }
 }

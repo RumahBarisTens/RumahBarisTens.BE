@@ -22,7 +22,7 @@ import propensi.tens.bms.features.shift_management.shift.models.ShiftSchedule;
 import propensi.tens.bms.features.shift_management.shift.repositories.ShiftScheduleRepository;
 
 @RestController
-@RequestMapping("/api/shift")
+@RequestMapping("/api/shift/d")
 public class ShiftDashboardController {
 
     @Autowired

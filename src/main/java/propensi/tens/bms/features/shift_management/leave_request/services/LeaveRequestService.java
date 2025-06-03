@@ -22,4 +22,7 @@ public interface LeaveRequestService {
     LeaveRequestResponseDTO getLeaveRequestByUsernameAndDate(String username, Date requestDate) throws Exception;
     LeaveRequestResponseDTO updateLeaveRequestByUsernameAndDate(String username, Date requestDate, UpdateLeaveRequestDTO updateLeaveRequestDTO) throws Exception;
     LeaveRequestResponseDTO approveRejectLeaveRequestByUsernameAndDate(String username, Date requestDate, ApproveRejectLeaveRequestDTO approveRejectLeaveRequestDTO) throws Exception;
+
+    List<LeaveRequestResponseDTO> getLeaveRequestsByHeadBar(String headBarUsername);
+
 }

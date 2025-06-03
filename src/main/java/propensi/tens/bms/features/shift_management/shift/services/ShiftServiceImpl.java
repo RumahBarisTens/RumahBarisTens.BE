@@ -1,32 +1,5 @@
 package propensi.tens.bms.features.shift_management.shift.services;
 
-import propensi.tens.bms.features.shift_management.shift.controllers.ShiftController;
-import propensi.tens.bms.features.shift_management.shift.dto.request.ShiftScheduleRequestDto;
-import propensi.tens.bms.features.shift_management.shift.dto.response.ShiftScheduleResponseDto;
-import propensi.tens.bms.features.shift_management.shift.models.ShiftDetail;
-import propensi.tens.bms.features.shift_management.shift.models.ShiftSchedule;
-import propensi.tens.bms.features.shift_management.shift.models.ShiftSummary;
-import propensi.tens.bms.features.shift_management.shift.repositories.ShiftScheduleRepository;
-
-import propensi.tens.bms.features.account_management.dto.response.BaristaDropdownResponseDTO;
-import propensi.tens.bms.features.account_management.models.Barista;
-import propensi.tens.bms.features.account_management.models.HeadBar;
-import propensi.tens.bms.features.account_management.models.EndUser;
-import propensi.tens.bms.features.account_management.models.ProbationBarista;
-import propensi.tens.bms.features.account_management.repositories.EndUserDb;
-
-import propensi.tens.bms.features.account_management.services.OutletService;
-import propensi.tens.bms.features.notification_management.services.NotificationService;
-import propensi.tens.bms.features.account_management.services.EndUserService;
-
-import propensi.tens.bms.features.shift_management.overtime.dto.response.OvertimeLogResponse;
-import propensi.tens.bms.features.shift_management.overtime.services.OvertimeLogService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -35,6 +8,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import propensi.tens.bms.features.account_management.dto.response.BaristaDropdownResponseDTO;
+import propensi.tens.bms.features.account_management.models.Barista;
+import propensi.tens.bms.features.account_management.models.EndUser;
+import propensi.tens.bms.features.account_management.models.HeadBar;
+import propensi.tens.bms.features.account_management.models.ProbationBarista;
+import propensi.tens.bms.features.account_management.repositories.EndUserDb;
+import propensi.tens.bms.features.account_management.services.EndUserService;
+import propensi.tens.bms.features.account_management.services.OutletService;
+import propensi.tens.bms.features.notification_management.services.NotificationService;
+import propensi.tens.bms.features.shift_management.overtime.dto.response.OvertimeLogResponse;
+import propensi.tens.bms.features.shift_management.overtime.services.OvertimeLogService;
+import propensi.tens.bms.features.shift_management.shift.controllers.ShiftController;
+import propensi.tens.bms.features.shift_management.shift.dto.request.ShiftScheduleRequestDto;
+import propensi.tens.bms.features.shift_management.shift.dto.response.ShiftScheduleResponseDto;
+import propensi.tens.bms.features.shift_management.shift.models.ShiftDetail;
+import propensi.tens.bms.features.shift_management.shift.models.ShiftSchedule;
+import propensi.tens.bms.features.shift_management.shift.models.ShiftSummary;
+import propensi.tens.bms.features.shift_management.shift.repositories.ShiftScheduleRepository;
 
 @Service
 public class ShiftServiceImpl implements ShiftService {
@@ -178,6 +178,18 @@ public class ShiftServiceImpl implements ShiftService {
         return "Unknown";
     }
 
+    
+    public boolean softDeleteShift(Long shiftId) {
+        Optional<ShiftSchedule> optionalShift = shiftScheduleRepository.findById(shiftId);
+        if (optionalShift.isEmpty()) return false;
+
+        ShiftSchedule shift = optionalShift.get();
+        shift.setDeletedAt(LocalDateTime.now());
+        shiftScheduleRepository.save(shift);
+
+        return true;
+    }
+    
     @Override
     public ShiftSummary getShiftSummary(UUID userId, String monthYear) {
         try {

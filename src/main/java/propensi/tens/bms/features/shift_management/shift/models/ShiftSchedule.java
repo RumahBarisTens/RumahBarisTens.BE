@@ -53,4 +53,8 @@ public class ShiftSchedule {
     private HeadBar headBar;
 
     private int overtimeHours;
+
+    
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }
