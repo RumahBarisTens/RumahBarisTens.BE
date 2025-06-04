@@ -1,10 +1,15 @@
 package propensi.tens.bms;
 
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
 import jakarta.transaction.Transactional;
 import propensi.tens.bms.features.account_management.models.Admin;
 import propensi.tens.bms.features.account_management.models.Barista;
@@ -27,10 +32,6 @@ import propensi.tens.bms.features.trainee_management.models.PeerReviewContent;
 import propensi.tens.bms.features.trainee_management.models.QuestionOption;
 import propensi.tens.bms.features.trainee_management.repositories.AssessmentRepository;
 import propensi.tens.bms.features.trainee_management.repositories.PeerReviewContentRepository;
-
-import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
 
 @SpringBootApplication
 public class BmsApplication {
@@ -117,6 +118,16 @@ public class BmsApplication {
             probationBaristaDb.save(createProbationBarista("jesse.pinkman", "Jesse Pinkman", true, "08101010101", outlet1));
             probationBaristaDb.save(createProbationBarista("todd.alquist", "Todd Alquist", false, "08202020202", outlet1));
             probationBaristaDb.save(createProbationBarista("andrea.cantillo", "Andrea Cantillo", true, "08303030303", outlet1));
+            probationBaristaDb.save(createProbationBarista("fatty.pete", "Skinny Pete", true, "08111111111", outlet2));
+            probationBaristaDb.save(createProbationBarista("combo.ortega", "Combo Ortega", false, "08222222222", outlet2));
+            probationBaristaDb.save(createProbationBarista("kim.warden", "Kim Wexler", true, "08333333333", outlet3));
+            probationBaristaDb.save(createProbationBarista("francesca.liddy", "Francesca Liddy", true, "08444444444", outlet3));
+            probationBaristaDb.save(createProbationBarista("kuby.huertas", "Kuby Huertas", false, "08555555555", outlet3));
+            probationBaristaDb.save(createProbationBarista("huell.babineaux", "Huell Babineaux", false, "08666666666", outlet4));
+            probationBaristaDb.save(createProbationBarista("lydia.rodarte", "Lydia Rodarte-Quayle", true, "08777777778", outlet4));
+            probationBaristaDb.save(createProbationBarista("duane.chow", "Duane Chow", false, "08888888889", outlet4));
+            probationBaristaDb.save(createProbationBarista("patrick.kels", "Patrick Kels", true, "08999999990", outlet5));
+            probationBaristaDb.save(createProbationBarista("richard.cook", "Richard Cook", false, "08121212121", outlet5));
 
             Assessment baristaA = new Assessment();
             baristaA.setTemplate(AssessmentTemplate.BARISTA);

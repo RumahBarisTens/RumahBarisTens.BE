@@ -241,6 +241,18 @@ public class AccountServiceImpl implements AccountService {
         return mapToEndUserResponseDTO(account, true);
     }
 
+    
+    // @Override
+    // public EndUserResponseDTO getAccountDetail(Long id ) throws EntityNotFoundException {
+    //     EndUser account = endUserDb.findById(id);
+
+    //     if (account == null) {
+    //         throw new EntityNotFoundException("account with username " + id + " not found");
+    //     }
+
+    //     return mapToEndUserResponseDTO(account, true);
+    // }
+
     private EndUserResponseDTO mapToEndUserResponseDTO(EndUser user, boolean isDetail) {
         EndUserResponseDTO dto = new EndUserResponseDTO();
         dto.setFullName(user.getFullName());

@@ -40,6 +40,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/account/change-password").permitAll()
                         .requestMatchers("/api/baristas/**").permitAll()
                         .requestMatchers("/api/shift/**").permitAll()
+                        .requestMatchers("/api/shift/dashboard").permitAll()
                         .requestMatchers("/api/account/create").hasAnyRole("Admin")
                         .requestMatchers("/api/training-materials/create").hasAnyRole("Admin")
                         .requestMatchers("/api/dashboard/**").permitAll()

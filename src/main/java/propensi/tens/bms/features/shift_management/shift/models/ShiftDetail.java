@@ -15,6 +15,8 @@ public class ShiftDetail {
     private String shiftTime;      // Shift time (e.g., "08:00 - 16:00")
     private boolean isOvertime;    // Whether this shift includes overtime
     
+
+    //tujuannya memang untuk ubah jwadwal kecil yg dipegang
     // Helper method to get shift time based on shift type
     public static String getShiftTimeByType(Integer shiftType) {
         return shiftType == 1 ? "08:00 - 16:00" : "16:00 - 00:00";

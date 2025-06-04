@@ -92,6 +92,30 @@ public class AccountController {
         }
     }
 
+    
+    // @GetMapping("/{id}")
+    // public ResponseEntity<?> getAccountDetail(@PathVariable("id") Long id) {
+    //     BaseResponseDTO<EndUserResponseDTO> baseResponseDTO = new BaseResponseDTO<>();
+    //     try {
+    //         EndUserResponseDTO policy = accountService.getAccountDetail(id);
+    //         baseResponseDTO.setStatus(HttpStatus.OK.value());
+    //         baseResponseDTO.setData(policy);
+    //         baseResponseDTO.setMessage("Account with username " + id + " fetched");
+    //         baseResponseDTO.setTimestamp(new Date());
+    //         return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
+    //     } catch (EntityNotFoundException e) {
+    //         baseResponseDTO.setStatus(HttpStatus.NOT_FOUND.value());
+    //         baseResponseDTO.setMessage(e.getMessage());
+    //         baseResponseDTO.setTimestamp(new Date());
+    //         return new ResponseEntity<>(baseResponseDTO, HttpStatus.NOT_FOUND);
+    //     } catch (Exception e) {
+    //         baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    //         baseResponseDTO.setMessage("An error raised");
+    //         baseResponseDTO.setTimestamp(new Date());
+    //         return new ResponseEntity<>(baseResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
     @PutMapping("/update-role-status")
     public ResponseEntity<?> updateRoleAndStatus(
             @RequestParam("username") String username,

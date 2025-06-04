@@ -48,6 +48,7 @@ public class ShiftSchedule {
     @Column(nullable = false)
     private UUID headBarId;
 
+    //tetep ada satu kolom saja, tetapi memang kolom ini untuk declare releationship hubungan saja. 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "headBarId", referencedColumnName = "id", insertable = false, updatable = false)
     private HeadBar headBar;
