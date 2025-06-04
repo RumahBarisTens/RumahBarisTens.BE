@@ -136,6 +136,7 @@ public class ShiftServiceImpl implements ShiftService {
     public ShiftScheduleResponseDto convertToResponseDto(ShiftSchedule shift) {
         ShiftScheduleResponseDto dto = new ShiftScheduleResponseDto();
 
+        dto.setCreatedAt(shift.getCreatedAt());
         dto.setShiftScheduleId(shift.getShiftScheduleId());
         dto.setShiftType(shift.getShiftType());
         dto.setDateShift(shift.getDateShift());

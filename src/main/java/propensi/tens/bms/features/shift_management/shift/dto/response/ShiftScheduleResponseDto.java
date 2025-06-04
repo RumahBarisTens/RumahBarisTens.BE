@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import propensi.tens.bms.features.account_management.dto.response.BaristaDropdow
 public class ShiftScheduleResponseDto {
 
     private Long shiftScheduleId;
+    private LocalDateTime createdAt;
     private Integer shiftType;
     private LocalDate dateShift;
     private Long outletId;
