@@ -2,10 +2,18 @@ package propensi.tens.bms.features.trainee_management.controllers;
 
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import propensi.tens.bms.features.account_management.dto.response.BaseResponseDTO;
 import propensi.tens.bms.features.trainee_management.dto.request.PeerReviewAssignmentRequestDTO;
 import propensi.tens.bms.features.trainee_management.dto.request.UpdatePeerReviewAssignmentRequestDTO;
@@ -95,6 +103,7 @@ public class PeerReviewAssignmentController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
 
     // Endpoint untuk mendapatkan list probation barista (reviewee)
     @GetMapping("/reviewees")
@@ -173,6 +182,26 @@ public class PeerReviewAssignmentController {
             response.setTimestamp(new Date());
             response.setData(null);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // Endpoint untuk mendapatkan reviewer dari outlet yang sama dengan reviewee
+    @GetMapping("/reviewers/by-reviewee/{revieweeUsername}")
+    public ResponseEntity<?> getReviewersByRevieweeOutlet(@PathVariable String revieweeUsername) {
+        BaseResponseDTO<List<String>> response = new BaseResponseDTO<>();
+        try {
+            List<String> reviewers = peerReviewAssignmentService.getEligibleReviewersFromSameOutlet(revieweeUsername);
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("List of reviewers from the same outlet retrieved successfully");
+            response.setTimestamp(new Date());
+            response.setData(reviewers);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

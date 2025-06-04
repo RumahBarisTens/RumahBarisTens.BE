@@ -19,4 +19,7 @@ public interface PeerReviewAssignmentService {
     
     // Method untuk update peer review assignment
     List<PeerReviewAssignmentResponseDTO> updatePeerReviewAssignments(String revieweeUsername, UpdatePeerReviewAssignmentRequestDTO request) throws Exception;
+
+    List<String> getEligibleReviewersFromSameOutlet(String revieweeUsername);
+
 }

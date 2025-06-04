@@ -7,7 +7,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import propensi.tens.bms.features.account_management.models.Barista;
 import propensi.tens.bms.features.account_management.models.EndUser;
+import propensi.tens.bms.features.account_management.models.HeadBar;
+import propensi.tens.bms.features.account_management.models.ProbationBarista;
 import propensi.tens.bms.features.account_management.repositories.EndUserDb;
 import propensi.tens.bms.features.notification_management.services.NotificationService;
 import propensi.tens.bms.features.trainee_management.dto.request.PeerReviewAssignmentRequestDTO;
@@ -26,6 +30,13 @@ public class PeerReviewAssignmentServiceImpl implements PeerReviewAssignmentServ
     private EndUserDb endUserDb;
 
     @Autowired private NotificationService notificationService;
+
+    @Autowired
+    private propensi.tens.bms.features.account_management.repositories.BaristaDb baristaDb;
+    @Autowired
+    private propensi.tens.bms.features.account_management.repositories.ProbationBaristaDb probationBaristaDb;
+    @Autowired
+    private propensi.tens.bms.features.account_management.repositories.HeadBarDb headBarDb;
 
     @Override
     public PeerReviewAssignmentResponseDTO createPeerReviewAssignment(PeerReviewAssignmentRequestDTO request) throws Exception {
@@ -90,6 +101,35 @@ public class PeerReviewAssignmentServiceImpl implements PeerReviewAssignmentServ
     }
 
     @Override
+    public List<String> getEligibleReviewersFromSameOutlet(String revieweeUsername) {
+        // Cari reviewee
+        EndUser reviewee = endUserDb.findByUsername(revieweeUsername);
+        if (reviewee == null) {
+            throw new IllegalArgumentException("Reviewee not found");
+        }
+        Long outletId = null;
+        if (reviewee instanceof propensi.tens.bms.features.account_management.models.ProbationBarista pb) {
+            outletId = pb.getOutlet() != null ? pb.getOutlet().getOutletId() : null;
+        } else if (reviewee instanceof propensi.tens.bms.features.account_management.models.Barista b) {
+            outletId = b.getOutlet() != null ? b.getOutlet().getOutletId() : null;
+        } else if (reviewee instanceof propensi.tens.bms.features.account_management.models.HeadBar hb) {
+            outletId = hb.getOutlet() != null ? hb.getOutlet().getOutletId() : null;
+        }
+        if (outletId == null) {
+            throw new IllegalArgumentException("Reviewee does not have an outlet");
+        }
+        // Ambil semua reviewer dari outlet yang sama (Barista, ProbationBarista, HeadBar)
+        List<String> usernames = new ArrayList<>();
+        usernames.addAll(baristaDb.findByOutlet_OutletId(outletId).stream().map(Barista::getUsername).toList());
+        usernames.addAll(probationBaristaDb.findByOutlet_OutletId(outletId).stream().map(ProbationBarista::getUsername).toList());
+        usernames.addAll(headBarDb.findByOutlet_OutletId(outletId).stream().map(HeadBar::getUsername).toList());
+        // Hapus reviewee dari list
+        usernames.remove(reviewee.getUsername());
+        return usernames;
+    }
+
+
+    @Override
     public List<PeerReviewAssignmentResponseDTO> getPeerReviewAssignmentsByReviewee(String revieweeUsername) throws Exception {
         EndUser reviewee = endUserDb.findByUsername(revieweeUsername);
         if (reviewee == null) {
@@ -141,35 +181,34 @@ public class PeerReviewAssignmentServiceImpl implements PeerReviewAssignmentServ
         if (reviewee == null) {
             throw new Exception("Reviewee dengan username " + revieweeUsername + " tidak ditemukan");
         }
-        
+
         List<PeerReviewAssignment> existingAssignments = peerReviewAssignmentRepository.findByRevieweeAndReviewedAtIsNull(reviewee);
-        
         peerReviewAssignmentRepository.deleteAll(existingAssignments);
-        
+
         List<PeerReviewAssignment> newAssignments = new ArrayList<>();
         for (String reviewerUsername : request.getReviewerUsernames()) {
             EndUser reviewer = endUserDb.findByUsername(reviewerUsername);
             if (reviewer == null) {
                 throw new Exception("Reviewer dengan username " + reviewerUsername + " tidak ditemukan");
             }
-            
+
             if (reviewer.getId().equals(reviewee.getId())) {
                 throw new Exception("Reviewer dan reviewee tidak boleh sama");
             }
-            
+
             // Buat assignment baru
             PeerReviewAssignment newAssignment = new PeerReviewAssignment();
             newAssignment.setReviewer(reviewer);
             newAssignment.setReviewee(reviewee);
             newAssignment.setEndDateFill(request.getEndDateFill());
-            
+
             newAssignments.add(newAssignment);
         }
-        
+
         // Simpan semua assignment baru
         List<PeerReviewAssignment> savedAssignments = peerReviewAssignmentRepository.saveAll(newAssignments);
-        
-        // Konversi ke response DTO
+
+        // Konversi ke response DTO dan kirim notifikasi
         List<PeerReviewAssignmentResponseDTO> responseList = new ArrayList<>();
         for (PeerReviewAssignment assignment : savedAssignments) {
             PeerReviewAssignmentResponseDTO response = new PeerReviewAssignmentResponseDTO();
@@ -177,9 +216,21 @@ public class PeerReviewAssignmentServiceImpl implements PeerReviewAssignmentServ
             response.setReviewerUsername(assignment.getReviewer().getUsername());
             response.setRevieweeUsername(assignment.getReviewee().getUsername());
             response.setEndDateFill(assignment.getEndDateFill());
+
+            // Kirim notifikasi
+            notificationService.notifyPeerReviewAssigned(
+                assignment.getPeerReviewAssignmentId(),
+                assignment.getReviewer().getUsername(),
+                assignment.getReviewee().getUsername()
+            );
+
             responseList.add(response);
         }
-        
+
         return responseList;
     }
+
+    
+
+
 }

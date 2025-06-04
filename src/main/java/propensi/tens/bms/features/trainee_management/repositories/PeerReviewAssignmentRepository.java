@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import propensi.tens.bms.features.account_management.models.EndUser;
+import propensi.tens.bms.features.account_management.models.Outlet;
 import propensi.tens.bms.features.trainee_management.models.PeerReviewAssignment;
 
 
@@ -25,5 +26,10 @@ public interface PeerReviewAssignmentRepository extends JpaRepository<PeerReview
     List<PeerReviewAssignment> findByReviewee(EndUser reviewee);
 
     List<PeerReviewAssignment> findByEndDateFillBetween(Date startDate, Date endDate);
+
+    List<User> findByOutletAndRoleNot(Outlet outlet, RoleEnum excludedRole);
+
+    
+
 
 }
