@@ -7,6 +7,8 @@ import propensi.tens.bms.features.account_management.dto.request.UpdatePersonalD
 import propensi.tens.bms.features.account_management.dto.response.EndUserResponseDTO;
 import propensi.tens.bms.features.account_management.models.*;
 import propensi.tens.bms.features.account_management.repositories.*;
+import propensi.tens.bms.features.notification_management.models.Notification;
+import propensi.tens.bms.features.notification_management.repositories.NotificationRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,6 +42,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private OutletDb outletDb;
+
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public String hashPassword(String password) {
@@ -287,210 +293,222 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-public EndUser updateAccountRoleAndStatus(String username, UpdateAccountRoleStatusDTO dto) throws Exception {
-    EndUser oldUser = endUserDb.findByUsername(username);
+    public EndUser updateAccountRoleAndStatus(String username, UpdateAccountRoleStatusDTO dto) throws Exception {
+        EndUser oldUser = endUserDb.findByUsername(username);
 
-    String newRole = dto.getRole();
-    String newStatus = dto.getStatus();
-    String newOutletName = dto.getOutletName();
-    
-    String currentRole = "";
-    if (oldUser instanceof Admin) {
-        currentRole = "admin";
-    } else if (oldUser instanceof HeadBar) {
-        currentRole = "head bar";
-    } else if (oldUser instanceof Barista) {
-        if (((Barista) oldUser).getIsIntern()) {
-            currentRole = "intern barista";
-        } else {
-            currentRole = "barista";
-        } 
-    } else if (oldUser instanceof ProbationBarista) {
-        currentRole = "probation barista";
-    } else if (oldUser instanceof CLevel) {
-        currentRole = ((CLevel) oldUser).getCLevelType().toLowerCase();
-    } else {
-        throw new Exception("Unknown user type");
-    }
-
-    // Get old outlet if exists
-    Outlet oldOutlet = null;
-    if (oldUser instanceof Barista) {
-        Barista oldBarista = baristaDb.findById(oldUser.getId()).orElse(null);
-        if (oldBarista != null) {
-            oldOutlet = oldBarista.getOutlet();
-        }
-    } else if (oldUser instanceof HeadBar) {
-        HeadBar oldHeadBar = headBarDb.findById(oldUser.getId()).orElse(null);
-        if (oldHeadBar != null) {
-            oldOutlet = oldHeadBar.getOutlet();
-        }
-    }
-
-    // Get new outlet if specified
-    Outlet newOutlet = null;
-    if (newOutletName != null) {
-        newOutlet = outletDb.findByName(newOutletName);
-        if (newOutlet == null) {
-            throw new Exception("Outlet with ID " + newOutletName + " not found");
-        }
-    } else if (oldOutlet != null) {
-        // Keep the old outlet if no new outlet specified
-        newOutlet = oldOutlet;
-    } else if (newRole.equalsIgnoreCase("barista") || newRole.equalsIgnoreCase("head bar")) {
-        // Default to first outlet if role requires an outlet but none specified
-        newOutlet = outletDb.findAll().get(0);
-    }
-
-    // If only status changes and role/outlet remain the same
-    if (newRole.equalsIgnoreCase(currentRole) && 
-       ((newOutletName == null) || (oldOutlet != null && oldOutlet.getOutletId().equals(newOutlet.getOutletId())))) {
+        String newRole = dto.getRole();
+        String newStatus = dto.getStatus();
+        String newOutletName = dto.getOutletName();
         
-        oldUser.setStatus(newStatus);
-        EndUser updatedUser;
-        
+        String currentRole = "";
         if (oldUser instanceof Admin) {
-            updatedUser = adminDb.save((Admin) oldUser);
+            currentRole = "admin";
         } else if (oldUser instanceof HeadBar) {
-            updatedUser = headBarDb.save((HeadBar) oldUser);
+            currentRole = "head bar";
         } else if (oldUser instanceof Barista) {
-            updatedUser = baristaDb.save((Barista) oldUser);
+            if (((Barista) oldUser).getIsIntern()) {
+                currentRole = "intern barista";
+            } else {
+                currentRole = "barista";
+            } 
         } else if (oldUser instanceof ProbationBarista) {
-            updatedUser = probationBaristaDb.save((ProbationBarista) oldUser);
+            currentRole = "probation barista";
         } else if (oldUser instanceof CLevel) {
-            updatedUser = cLevelDb.save((CLevel) oldUser);
+            currentRole = ((CLevel) oldUser).getCLevelType().toLowerCase();
         } else {
-            throw new Exception("Unknown user type.");
+            throw new Exception("Unknown user type");
         }
+
+        // Get old outlet if exists
+        Outlet oldOutlet = null;
+        if (oldUser instanceof Barista) {
+            Barista oldBarista = baristaDb.findById(oldUser.getId()).orElse(null);
+            if (oldBarista != null) {
+                oldOutlet = oldBarista.getOutlet();
+            }
+        } else if (oldUser instanceof HeadBar) {
+            HeadBar oldHeadBar = headBarDb.findById(oldUser.getId()).orElse(null);
+            if (oldHeadBar != null) {
+                oldOutlet = oldHeadBar.getOutlet();
+            }
+        }
+
+        // Get new outlet if specified
+        Outlet newOutlet = null;
+        if (newOutletName != null) {
+            newOutlet = outletDb.findByName(newOutletName);
+            if (newOutlet == null) {
+                throw new Exception("Outlet with ID " + newOutletName + " not found");
+            }
+        } else if (oldOutlet != null) {
+            // Keep the old outlet if no new outlet specified
+            newOutlet = oldOutlet;
+        } else if (newRole.equalsIgnoreCase("barista") || newRole.equalsIgnoreCase("head bar")) {
+            // Default to first outlet if role requires an outlet but none specified
+            newOutlet = outletDb.findAll().get(0);
+        }
+
+        // If only status changes and role/outlet remain the same
+        if (newRole.equalsIgnoreCase(currentRole) && 
+        ((newOutletName == null) || (oldOutlet != null && oldOutlet.getOutletId().equals(newOutlet.getOutletId())))) {
+            
+            oldUser.setStatus(newStatus);
+            EndUser updatedUser;
+            
+            if (oldUser instanceof Admin) {
+                updatedUser = adminDb.save((Admin) oldUser);
+            } else if (oldUser instanceof HeadBar) {
+                updatedUser = headBarDb.save((HeadBar) oldUser);
+            } else if (oldUser instanceof Barista) {
+                updatedUser = baristaDb.save((Barista) oldUser);
+            } else if (oldUser instanceof ProbationBarista) {
+                updatedUser = probationBaristaDb.save((ProbationBarista) oldUser);
+            } else if (oldUser instanceof CLevel) {
+                updatedUser = cLevelDb.save((CLevel) oldUser);
+            } else {
+                throw new Exception("Unknown user type.");
+            }
+            return updatedUser;
+        }
+
+        // Remove user from old outlet if exists
+        if (oldOutlet != null) {
+            if (oldUser instanceof Barista) {
+                oldOutlet.getListBarista().removeIf(b -> b.getId().equals(oldUser.getId()));
+                outletDb.save(oldOutlet);
+            } else if (oldUser instanceof HeadBar) {
+                oldOutlet.setHeadbar(null);
+                outletDb.save(oldOutlet);
+            }
+        }
+
+        // Save user data before deletion
+        UUID userId = oldUser.getId();
+        String oldUsername = oldUser.getUsername();
+        String oldPassword = oldUser.getPassword();
+        String oldFullName = oldUser.getFullName();
+        Boolean oldGender = oldUser.getGender();
+        String oldPhoneNumber = oldUser.getPhoneNumber();
+        String oldAddress = oldUser.getAddress();
+        Date oldDateOfBirth = oldUser.getDateOfBirth();
+
+        List<Notification> notifications = notificationRepository.findByRecipientOrderByCreatedAtDesc(oldUser);
+        notificationRepository.deleteAllById(notifications.stream()
+                .map(Notification::getId)
+                .collect(Collectors.toList()));
+        endUserDb.delete(oldUser);
+
+        EndUser updatedUser;
+
+        switch (newRole.toLowerCase()) {
+            case "admin":
+                Admin admin = new Admin();
+                admin.setId(userId);
+                admin.setUsername(oldUsername);
+                admin.setPassword(oldPassword);
+                admin.setFullName(oldFullName);
+                admin.setGender(oldGender);
+                admin.setPhoneNumber(oldPhoneNumber);
+                admin.setAddress(oldAddress);
+                admin.setDateOfBirth(oldDateOfBirth);
+                admin.setStatus(newStatus);
+                updatedUser = adminDb.save(admin);
+                break;
+
+            case "clevel":
+            case "hr":
+                CLevel cLevel = new CLevel();
+                cLevel.setId(userId);
+                cLevel.setUsername(oldUsername);
+                cLevel.setPassword(oldPassword);
+                cLevel.setFullName(oldFullName);
+                cLevel.setGender(oldGender);
+                cLevel.setPhoneNumber(oldPhoneNumber);
+                cLevel.setAddress(oldAddress);
+                cLevel.setDateOfBirth(oldDateOfBirth);
+                cLevel.setStatus(newStatus);
+                cLevel.setCLevelType(newRole);
+                updatedUser = cLevelDb.save(cLevel);
+                break;
+
+            case "head bar":
+                if (newOutlet == null) {
+                    throw new Exception("Head Bar must be assigned to an outlet");
+                }
+                
+                // Check if the outlet already has a head bar
+                if (newOutlet.getHeadbar() != null && !newOutlet.getHeadbar().getId().equals(userId)) {
+                    throw new Exception("Outlet already has a Head Bar assigned");
+                }
+                
+                HeadBar headBar = new HeadBar();
+                headBar.setId(userId);
+                headBar.setUsername(oldUsername);
+                headBar.setPassword(oldPassword);
+                headBar.setFullName(oldFullName);
+                headBar.setGender(oldGender);
+                headBar.setPhoneNumber(oldPhoneNumber);
+                headBar.setAddress(oldAddress);
+                headBar.setDateOfBirth(oldDateOfBirth);
+                headBar.setStatus(newStatus);
+                headBar.setOutlet(newOutlet);
+                updatedUser = headBarDb.save(headBar);
+                
+                newOutlet.setHeadbar(headBar);
+                outletDb.save(newOutlet);
+                break;
+
+            case "barista":
+            case "intern barista":
+                if (newOutlet == null) {
+                    throw new Exception("Barista must be assigned to an outlet");
+                }
+                
+                Barista barista = new Barista();
+                barista.setId(userId);
+                barista.setUsername(oldUsername);
+                barista.setPassword(oldPassword);
+                barista.setFullName(oldFullName);
+                barista.setGender(oldGender);
+                barista.setPhoneNumber(oldPhoneNumber);
+                barista.setAddress(oldAddress);
+                barista.setDateOfBirth(oldDateOfBirth);
+                barista.setStatus(newStatus);
+                barista.setOutlet(newOutlet);
+                barista.setIsIntern(newRole.equalsIgnoreCase("intern barista"));
+                updatedUser = baristaDb.save(barista);
+                
+                newOutlet.getListBarista().add(barista);
+                outletDb.save(newOutlet);
+                break;
+
+            case "probation barista":
+                if (newOutlet == null) {
+                    throw new Exception("Probation Barista must be assigned to an outlet");
+                }
+                ProbationBarista probationBarista = new ProbationBarista();
+                probationBarista.setId(userId);
+                probationBarista.setUsername(oldUsername);
+                probationBarista.setPassword(oldPassword);
+                probationBarista.setFullName(oldFullName);
+                probationBarista.setGender(oldGender);
+                probationBarista.setPhoneNumber(oldPhoneNumber);
+                probationBarista.setAddress(oldAddress);
+                probationBarista.setDateOfBirth(oldDateOfBirth);
+                probationBarista.setStatus(newStatus);
+                probationBarista.setOutlet(newOutlet);
+                updatedUser = probationBaristaDb.save(probationBarista);
+
+                newOutlet.getListProb().add(probationBarista);
+                outletDb.save(newOutlet);
+                break;
+
+            default:
+                throw new Exception("Invalid role: " + newRole);
+        }
+
         return updatedUser;
     }
-
-    // Remove user from old outlet if exists
-    if (oldOutlet != null) {
-        if (oldUser instanceof Barista) {
-            oldOutlet.getListBarista().removeIf(b -> b.getId().equals(oldUser.getId()));
-            outletDb.save(oldOutlet);
-        } else if (oldUser instanceof HeadBar) {
-            oldOutlet.setHeadbar(null);
-            outletDb.save(oldOutlet);
-        }
-    }
-
-    // Save user data before deletion
-    UUID userId = oldUser.getId();
-    String oldUsername = oldUser.getUsername();
-    String oldPassword = oldUser.getPassword();
-    String oldFullName = oldUser.getFullName();
-    Boolean oldGender = oldUser.getGender();
-    String oldPhoneNumber = oldUser.getPhoneNumber();
-    String oldAddress = oldUser.getAddress();
-    Date oldDateOfBirth = oldUser.getDateOfBirth();
-
-    endUserDb.delete(oldUser);
-    EndUser updatedUser;
-
-    switch (newRole.toLowerCase()) {
-        case "admin":
-            Admin admin = new Admin();
-            admin.setId(userId);
-            admin.setUsername(oldUsername);
-            admin.setPassword(oldPassword);
-            admin.setFullName(oldFullName);
-            admin.setGender(oldGender);
-            admin.setPhoneNumber(oldPhoneNumber);
-            admin.setAddress(oldAddress);
-            admin.setDateOfBirth(oldDateOfBirth);
-            admin.setStatus(newStatus);
-            updatedUser = adminDb.save(admin);
-            break;
-
-        case "clevel":
-        case "hr":
-            CLevel cLevel = new CLevel();
-            cLevel.setId(userId);
-            cLevel.setUsername(oldUsername);
-            cLevel.setPassword(oldPassword);
-            cLevel.setFullName(oldFullName);
-            cLevel.setGender(oldGender);
-            cLevel.setPhoneNumber(oldPhoneNumber);
-            cLevel.setAddress(oldAddress);
-            cLevel.setDateOfBirth(oldDateOfBirth);
-            cLevel.setStatus(newStatus);
-            cLevel.setCLevelType(newRole);
-            updatedUser = cLevelDb.save(cLevel);
-            break;
-
-        case "head bar":
-            if (newOutlet == null) {
-                throw new Exception("Head Bar must be assigned to an outlet");
-            }
-            
-            // Check if the outlet already has a head bar
-            if (newOutlet.getHeadbar() != null && !newOutlet.getHeadbar().getId().equals(userId)) {
-                throw new Exception("Outlet already has a Head Bar assigned");
-            }
-            
-            HeadBar headBar = new HeadBar();
-            headBar.setId(userId);
-            headBar.setUsername(oldUsername);
-            headBar.setPassword(oldPassword);
-            headBar.setFullName(oldFullName);
-            headBar.setGender(oldGender);
-            headBar.setPhoneNumber(oldPhoneNumber);
-            headBar.setAddress(oldAddress);
-            headBar.setDateOfBirth(oldDateOfBirth);
-            headBar.setStatus(newStatus);
-            headBar.setOutlet(newOutlet);
-            updatedUser = headBarDb.save(headBar);
-            
-            newOutlet.setHeadbar(headBar);
-            outletDb.save(newOutlet);
-            break;
-
-        case "barista":
-        case "intern barista":
-            if (newOutlet == null) {
-                throw new Exception("Barista must be assigned to an outlet");
-            }
-            
-            Barista barista = new Barista();
-            barista.setId(userId);
-            barista.setUsername(oldUsername);
-            barista.setPassword(oldPassword);
-            barista.setFullName(oldFullName);
-            barista.setGender(oldGender);
-            barista.setPhoneNumber(oldPhoneNumber);
-            barista.setAddress(oldAddress);
-            barista.setDateOfBirth(oldDateOfBirth);
-            barista.setStatus(newStatus);
-            barista.setOutlet(newOutlet);
-            barista.setIsIntern(newRole.equalsIgnoreCase("intern barista"));
-            updatedUser = baristaDb.save(barista);
-            
-            newOutlet.getListBarista().add(barista);
-            outletDb.save(newOutlet);
-            break;
-
-        case "probation barista":
-            ProbationBarista probationBarista = new ProbationBarista();
-            probationBarista.setId(userId);
-            probationBarista.setUsername(oldUsername);
-            probationBarista.setPassword(oldPassword);
-            probationBarista.setFullName(oldFullName);
-            probationBarista.setGender(oldGender);
-            probationBarista.setPhoneNumber(oldPhoneNumber);
-            probationBarista.setAddress(oldAddress);
-            probationBarista.setDateOfBirth(oldDateOfBirth);
-            probationBarista.setStatus(newStatus);
-            updatedUser = probationBaristaDb.save(probationBarista);
-            break;
-
-        default:
-            throw new Exception("Invalid role: " + newRole);
-    }
-
-    return updatedUser;
-}
 
 
     @Override

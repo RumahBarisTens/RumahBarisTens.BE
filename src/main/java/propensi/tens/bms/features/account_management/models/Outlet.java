@@ -28,4 +28,7 @@ public class Outlet {
     @OneToMany(mappedBy = "outlet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<Barista> listBarista;
 
+    @OneToMany(mappedBy = "outlet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<ProbationBarista> listProb;
+
 }
