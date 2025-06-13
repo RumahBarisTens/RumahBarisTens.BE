@@ -86,11 +86,17 @@ public class BmsApplication {
             outlet5.setName("Tens Coffee UPN Veteran Jakarta");
             outlet5.setLocation("Jl. Pangkalan Jati 1 No.1e, Cinere, Depok, Jawa Barat 16513");
 
+            Outlet outlet6 = new Outlet();
+            outlet6.setName("Tens Coffee Balairung");
+            outlet6.setLocation("Jl. Raya Balairung No.1, Pondok Cina, Beji, Depok, Jawa Barat 16424");
+
             outletDb.save(outlet1);
             outletDb.save(outlet2);
             outletDb.save(outlet3);
             outletDb.save(outlet4);
             outletDb.save(outlet5);
+            outletDb.save(outlet6);
+            
 
             baristaDb.save(createBarista("skinny.pete", "Skinny Pete", true, true, "08111111111", outlet1));
             baristaDb.save(createBarista("brandon.mayhew", "Brandon Mayhew", false, false, "08222222222", outlet2));
@@ -99,20 +105,35 @@ public class BmsApplication {
             cLevelDb.save(createCLevel("gustavo.fring", "Gustavo Fring", true, "08444444444", "CLEVEL"));
             cLevelDb.save(createCLevel("mike.ehrmantraut", "Mike Ehrmantraut", true, "08666666666", "HR"));
 
-            HeadBar headBar1 = createHeadBar("hank.schrader", "Hank Schrader", true, "08777777777", outlet4);
+            HeadBar headBar1 = createHeadBar("novi.irianti", "Novi Irianti", true, "08777777777", outlet2);
             headBar1 = headBarDb.save(headBar1);
-            outlet4.setHeadbar(headBar1);
-            outletDb.save(outlet4);
+            outlet2.setHeadbar(headBar1);
+            outletDb.save(outlet2);
 
-            HeadBar headBar2 = createHeadBar("steve.gomez", "Steve Gomez", false, "08888888888", outlet5);
+            HeadBar headBar2 = createHeadBar("dewi.astuti", "Dewi Astuti", false, "08888888888", outlet5);
             headBar2 = headBarDb.save(headBar2);
             outlet5.setHeadbar(headBar2);
             outletDb.save(outlet5);
 
-            HeadBar headBar3 = createHeadBar("victor.sal", "Victor Sal", true, "08999999999", outlet1);
+            HeadBar headBar3 = createHeadBar("annisa.zaskia", "Annisa Kayla Zaskia", true, "08999999999", outlet1);
             headBar3 = headBarDb.save(headBar3);
             outlet1.setHeadbar(headBar3);
             outletDb.save(outlet1);
+
+            HeadBar headBar4 = createHeadBar("farhan.satrio", "Farhan Hadi Satrio", true, "08999999999", outlet3);
+            headBar4 = headBarDb.save(headBar4);
+            outlet3.setHeadbar(headBar4);
+            outletDb.save(outlet3);
+
+            HeadBar headBar5 = createHeadBar("faraz.taqwa", "Faraz Taqwa", true, "08999999999", outlet4);
+            headBar5 = headBarDb.save(headBar5);
+            outlet4.setHeadbar(headBar5);
+            outletDb.save(outlet4);
+
+            HeadBar headBar6 = createHeadBar("faraz.taqwa", "Faraz Taqwa", true, "08999999999", outlet6);
+            headBar6 = headBarDb.save(headBar6);
+            outlet6.setHeadbar(headBar6);
+            outletDb.save(outlet6);
 
             probationBaristaDb.save(createProbationBarista("jesse.pinkman", "Jesse Pinkman", true, "08101010101", outlet1));
             probationBaristaDb.save(createProbationBarista("todd.alquist", "Todd Alquist", false, "08202020202", outlet1));
