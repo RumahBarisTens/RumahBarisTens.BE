@@ -102,6 +102,22 @@ public class BmsApplication {
             baristaDb.save(createBarista("brandon.mayhew", "Brandon Mayhew", false, false, "08222222222", outlet2));
             baristaDb.save(createBarista("christian.ortega", "Christian Ortega", true, false, "08333333333", outlet3));
 
+            baristaDb.save(createBarista("akinny.pete", "Akinny Pete", true, true, "08111111111", outlet4));
+            baristaDb.save(createBarista("crandon.mayhew", "Crandon Mayhew", false, false, "08222222222", outlet5));
+            baristaDb.save(createBarista("dhristian.ortega", "Dhristian Ortega", true, false, "08333333333", outlet6));
+
+            baristaDb.save(createBarista("bkinny.pete", "Skinny Pete", true, true, "08111111111", outlet4));
+            baristaDb.save(createBarista("drandon.mayhew", "Brandon Mayhew", false, false, "08222222222", outlet5));
+            baristaDb.save(createBarista("ehristian.ortega", "Christian Ortega", true, false, "08333333333", outlet6));
+
+            baristaDb.save(createBarista("ckinny.pete", "Ckinny Pete", true, true, "08111111111", outlet4));
+            baristaDb.save(createBarista("erandon.mayhew", "Erandon Mayhew", false, false, "08222222222", outlet5));
+            baristaDb.save(createBarista("fhristian.ortega", "Fhristian Ortega", true, false, "08333333333", outlet6));
+
+            baristaDb.save(createBarista("dkinny.pete", "Dkinny Pete", true, true, "08111111111", outlet2));
+            baristaDb.save(createBarista("frandon.mayhew", "Frandon Mayhew", false, false, "08222222222", outlet3));
+            baristaDb.save(createBarista("ghristian.ortega", "Ghristian Ortega", true, false, "08333333333", outlet3));
+
             cLevelDb.save(createCLevel("gustavo.fring", "Gustavo Fring", true, "08444444444", "CLEVEL"));
             cLevelDb.save(createCLevel("mike.ehrmantraut", "Mike Ehrmantraut", true, "08666666666", "HR"));
 
@@ -130,7 +146,7 @@ public class BmsApplication {
             outlet4.setHeadbar(headBar5);
             outletDb.save(outlet4);
 
-            HeadBar headBar6 = createHeadBar("faraz.taqwa", "Faraz Taqwa", true, "08999999999", outlet6);
+            HeadBar headBar6 = createHeadBar("airell.raditya", "Airell Viral Raditya", true, "08999999999", outlet6);
             headBar6 = headBarDb.save(headBar6);
             outlet6.setHeadbar(headBar6);
             outletDb.save(outlet6);
