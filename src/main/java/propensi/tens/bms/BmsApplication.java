@@ -146,7 +146,7 @@ public class BmsApplication {
             outlet4.setHeadbar(headBar5);
             outletDb.save(outlet4);
 
-            HeadBar headBar6 = createHeadBar("airell.raditya", "Airell Viral Raditya", true, "08999999999", outlet6);
+            HeadBar headBar6 = createHeadBar("alexandre.alexandre", "Alexandre", true, "08999999999", outlet6);
             headBar6 = headBarDb.save(headBar6);
             outlet6.setHeadbar(headBar6);
             outletDb.save(outlet6);

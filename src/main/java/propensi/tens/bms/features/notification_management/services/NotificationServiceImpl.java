@@ -593,7 +593,7 @@ public class NotificationServiceImpl implements NotificationService {
     " has been approved";
 
         String resourceType = "LEAVE_REQUEST";
-        String actionUrl = "/jadwal/izin-cuti/barista/list";
+        String actionUrl = "/jadwal/izin-cuti/barista";
         
         try {
             createNotification(
